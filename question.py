@@ -68,13 +68,14 @@ A word is a sequence of characters delimited by spaces/tabs.
     qvars["subject"] = subject
 
 
-qvars = {"prog_name": "test_question",
-         "params":
-             [
-                 importlib.import_module("move_word"),
-                 importlib.import_module("capitalizer"),
-             ],
-         }
+qvars = {
+    "prog_name": "test_question",
+    "params":
+        [
+            importlib.import_module("move_word"),
+            importlib.import_module("capitalizer"),
+        ],
+}
 
 init()
 build_subject()
