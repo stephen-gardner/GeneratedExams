@@ -2,7 +2,7 @@ from enum import Enum
 import random
 
 
-class Type(Enum):
+class Capital(Enum):
     UPPER_FIRST = 0
     UPPER_LAST = 1
     UPPER_ALL = 2
@@ -18,7 +18,7 @@ def init(variables):
     global qvars
     qvars = variables
     random.seed(qvars.get("seed"))
-    qvars["capitalizer.type"] = Type(random.randint(0, 5))
+    qvars["capitalizer.type"] = Capital(random.randint(0, 5))
 
 
 def execute():
@@ -29,25 +29,25 @@ def execute():
         res = []
         words = arg.replace('\t', ' ').split(' ')
         for w in words:
-            if cap_type == Type.UPPER_FIRST:
+            if cap_type == Capital.UPPER_FIRST:
                 w = w[0].upper() + w[1:len(w)].lower() if len(w) > 1 else w.upper()
-            elif cap_type == Type.UPPER_LAST:
+            elif cap_type == Capital.UPPER_LAST:
                 w = w[:len(w) - 1].lower() + w[len(w) - 1].upper() if len(w) > 1 else w.lower()
-            elif cap_type == Type.UPPER_ALL:
+            elif cap_type == Capital.UPPER_ALL:
                 w = w.upper()
-            elif cap_type == Type.LOWER_ALL:
+            elif cap_type == Capital.LOWER_ALL:
                 w = w.lower()
             else:
-                capitalized = ""
-                cap = cap_type == Type.ALTERNATE_FIRST
+                alternated = ""
+                cap = cap_type == Capital.ALTERNATE_FIRST
                 for l in w:
                     if cap:
-                        capitalized += l.upper()
+                        alternated += l.upper()
                         cap = False
                     else:
-                        capitalized += l.lower()
+                        alternated += l.lower()
                         cap = True
-                w = capitalized
+                w = alternated
 
             res.append(w)
         args[ac] = " ".join(res)
@@ -56,20 +56,20 @@ def execute():
 def get_subject():
     cap_type = qvars.get("capitalizer.type")
 
-    if cap_type == Type.UPPER_FIRST or cap_type == Type.UPPER_LAST:
+    if cap_type == Capital.UPPER_FIRST or cap_type == Capital.UPPER_LAST:
         return """
-Outputs given strings with the {} character of each word in uppercase, and the
-rest in lowercase, followed by a newline.
-""".format("first" if cap_type == Type.UPPER_FIRST else "last")
-    elif cap_type == Type.UPPER_ALL or cap_type == Type.LOWER_ALL:
+Outputs given strings with the {} character of each word in uppercase, and the rest in lowercase, followed by a newline.
+
+A word is a sequence of characters delimited by spaces/tabs.
+""".format("first" if cap_type == Capital.UPPER_FIRST else "last")
+    elif cap_type == Capital.UPPER_ALL or cap_type == Capital.LOWER_ALL:
         return """
-Outputs given strings in all {}, followed by a newline.
-""".format("uppercase" if cap_type == Type.UPPER_ALL else "lowercase")
+Outputs given strings in all {} characters, followed by a newline.
+""".format("uppercase" if cap_type == Capital.UPPER_ALL else "lowercase")
     else:
         return """
-Output given strings with alternating uppercase and lowercase characters,
-starting in {}, followed by a newline.
-""".format("uppercase" if cap_type == Type.ALTERNATE_FIRST else "lowercase")
+Output given strings with alternating uppercase and lowercase characters, starting in {}, followed by a newline.
+""".format("uppercase" if cap_type == Capital.ALTERNATE_FIRST else "lowercase")
 
 
 def get_examples():

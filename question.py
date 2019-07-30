@@ -1,28 +1,92 @@
 import importlib
+import pkgutil
 import random
-from datetime import datetime
+import parameters.num_args as num_args
 
 
-def init():
-    seed = datetime.utcnow().timestamp()
-    random.seed(seed)
-    qvars["seed"] = seed
+class Question:
+    def __init__(self, seed, prog_name, category, base_params=None):
+        params = []
+        path = "parameters." + category
+        for param_name in base_params or []:
+            params.append(importlib.import_module(path + "." + param_name))
 
-    params = qvars["params"]
+        self.qvars = {
+            "params": params,
+            "path": path,
+            "prog_name": prog_name,
+            "seed": seed,
+        }
 
-    for p in params:
-        p.init(qvars)
+        self.available_params = []
+        sub_pkg = importlib.import_module(path)
+        for _, param_name, _ in pkgutil.iter_modules(sub_pkg.__path__):
+            if base_params is None or param_name not in base_params:
+                self.available_params.append(importlib.import_module(path + "." + param_name))
 
+        random.seed(seed)
 
-def execute():
-    params = qvars["params"]
+    def limit_args(self, n=None, compare_type=None):
+        if n is not None:
+            self.qvars["num_args.n"] = n
+        if compare_type is not None:
+            self.qvars["num_args.type"] = num_args.Compare[compare_type]
+        self.qvars.get("params").append(num_args)
+        return self
 
-    for p in params:
-        p.execute()
+    def load_params(self):
+        if len(self.available_params) > 1:
+            nparams = random.randint(1, len(self.available_params))
+            for param in random.sample(self.available_params, nparams):
+                self.qvars.get("params").append(param)
+
+        for param in self.qvars.get("params"):
+            param.init(self.qvars)
+        return self
+
+    def execute(self):
+        for param in self.qvars.get("params"):
+            param.execute()
+        return self.qvars.get("args")
+
+    def expand_vars(self, data):
+        for key, value in self.qvars.items():
+            data = data.replace("%" + key + "%", str(value))
+        return data.replace("\\%", "%")
+
+    def build_examples(self):
+        examples = [""]
+        for param in self.qvars.get("params"):
+            examples += param.get_examples()
+
+        processed = set([])
+        use_cat = True
+        for ex in examples:
+            multi = type(ex) is list
+            self.qvars["args"] = ex if multi else [ex]
+            res = self.execute()
+            if multi:
+                ex = "\" \"".join(ex)
+            processed.add(format_example(ex, "\n".join(res), use_cat))
+            use_cat = random.randint(1, 100) > 90
+
+        processed = self.expand_vars("Examples:\n\n" + "\n".join(processed))
+        self.qvars["examples"] = processed
+        return self
+
+    def build_subject(self):
+        subject = ""
+
+        for param in self.qvars.get("params"):
+            subject += param.get_subject()
+
+        subject = self.expand_vars(subject)
+        self.qvars["subject"] = subject
+        return self
 
 
 def format_example(arg, ex, cat):
-    res = "$>./{} \"{}\""
+    res = "$>./%prog_name% \"{}\""
 
     if cat:
         res += " | cat -e"
@@ -32,53 +96,4 @@ def format_example(arg, ex, cat):
     if cat:
         res += "$"
 
-    return res.format(qvars["prog_name"], arg, ex)
-
-
-def build_examples():
-    params = qvars.get("params")
-
-    examples = [""]
-    for p in params:
-        examples += p.get_examples()
-
-    res = []
-    cat = True
-    for e in examples:
-        qvars["args"] = [e] if isinstance(e, str) else e
-        execute()
-        if not isinstance(e, str):
-            e = "\" \"".join(e)
-        res.append(format_example(e, "\n".join(qvars.get("args")), cat))
-        cat = random.randint(1, 100) > 90
-
-    qvars["examples"] = "\nExamples:\n\n" + "\n".join(res)
-
-
-def build_subject():
-    params = qvars["params"]
-
-    subject = """
-A word is a sequence of characters delimited by spaces/tabs.
-"""
-
-    for p in params:
-        subject += p.get_subject()
-
-    qvars["subject"] = subject
-
-
-qvars = {
-    "prog_name": "test_question",
-    "params":
-        [
-            importlib.import_module("move_word"),
-            importlib.import_module("capitalizer"),
-        ],
-}
-
-init()
-build_subject()
-build_examples()
-print(qvars.get("subject"))
-print(qvars.get("examples"))
+    return res.format(arg, ex)

@@ -8,15 +8,13 @@ def init(variables):
     qvars = variables
     random.seed(qvars.get("seed"))
     qvars["move_word.idx"] = random.randint(2, 42)
+    qvars["move_word.dest"] = "front" if random.randint(0, 1) == 0 else "back"
 
 
 def execute():
     args = qvars.get("args")
     idx = qvars.get("move_word.idx")
-
-    if len(args) > 1:
-        qvars["args"] = [""]
-        return
+    dest = qvars.get("move_word.dest")
 
     for i, arg in enumerate(args):
         words = arg.replace('\t', ' ').split(' ')
@@ -30,23 +28,22 @@ def execute():
             continue
 
         idx = (idx - 1) % len(trimmed)
-        res = trimmed[idx:idx + 1] + trimmed[0:idx] + trimmed[idx + 1:]
+        if dest == "front":
+            res = trimmed[idx:idx + 1] + trimmed[0:idx] + trimmed[idx + 1:]
+        else:
+            res = trimmed[0:idx] + trimmed[idx + 1:] + trimmed[idx:idx + 1]
 
         args[i] = " ".join(res)
 
 
 def get_subject():
-    idx = qvars.get("move_word.idx")
-
     return """
-Outputs given string with word #{} moved to the front of the string, with each
-word separated by exactly one space.
+Outputs given strings with word #%move_word.idx% moved to the %move_word.dest% of the string, with each word separated by exactly one space.
 
-If the string contains fewer words than {}, the program continues counting from
-the front of the string.
+If the string contains fewer words than %move_word.idx%, the program continues counting from the front of the string.
 
-If the number of args is not 1, outputs a '\\n'
-""".format(idx, idx)
+A word is a sequence of characters delimited by spaces/tabs.
+"""
 
 
 def get_examples():
