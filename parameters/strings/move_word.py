@@ -8,7 +8,7 @@ def init(variables):
     qvars = variables
     random.seed(qvars.get("seed"))
     qvars["move_word.idx"] = random.randint(2, 42)
-    qvars["move_word.dest"] = "front" if random.randint(0, 1) == 0 else "back"
+    qvars["move_word.dest"] = "front" if random.randint(0, 1) == 0 else "end"
 
 
 def execute():
@@ -33,15 +33,13 @@ def execute():
         else:
             res = trimmed[0:idx] + trimmed[idx + 1:] + trimmed[idx:idx + 1]
 
-        args[i] = " ".join(res)
+        args[i] = ' '.join(res)
 
 
 def get_subject():
     return """
 Outputs given strings with word #%move_word.idx% moved to the %move_word.dest% of the string, with each word separated by exactly one space.
-
 If the string contains fewer words than %move_word.idx%, the program continues counting from the front of the string.
-
 A word is a sequence of characters delimited by spaces/tabs.
 """
 
