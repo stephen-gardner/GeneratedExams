@@ -21,15 +21,15 @@ def init(variables):
     qvars["capitalizer.type"] = Capital(random.randint(0, 5))
 
 
-def execute():
-    args = qvars.get("args")
+def execute(argv):
     cap_type = qvars.get("capitalizer.type")
 
-    for ac, arg in enumerate(args):
+    output = []
+    for arg in argv:
         if cap_type == Capital.UPPER_ALL:
-            args[ac] = arg.upper()
+            output.append(arg.upper())
         elif cap_type == Capital.LOWER_ALL:
-            args[ac] = arg.lower()
+            output.append(arg.lower())
         else:
             res = ""
             if cap_type == Capital.UPPER_FIRST:
@@ -45,7 +45,8 @@ def execute():
                 for c in arg:
                     res += c.upper() if cap else c.lower()
                     cap = not cap if c.isalnum() else cap_type == Capital.ALTERNATE_FIRST
-            args[ac] = res
+            output.append(res)
+    return output
 
 
 def get_subject():
@@ -53,16 +54,16 @@ def get_subject():
 
     if cap_type == Capital.UPPER_FIRST or cap_type == Capital.UPPER_LAST:
         return """
-Outputs given strings with the {} character of each word in uppercase, and the rest in lowercase, followed by a newline.
+Outputs given strings with the {} character of each word in uppercase, and the rest in lowercase.
 A word is a sequence of characters delimited by spaces/tabs.
 """.format("first" if cap_type == Capital.UPPER_FIRST else "last")
     elif cap_type == Capital.UPPER_ALL or cap_type == Capital.LOWER_ALL:
         return """
-Outputs given strings in all {} characters, followed by a newline.
+Outputs given strings in all {} characters.
 """.format("uppercase" if cap_type == Capital.UPPER_ALL else "lowercase")
     else:
         return """
-Output given strings with alternating uppercase and lowercase characters for each word, starting in {}, followed by a newline.
+Output given strings with alternating uppercase and lowercase characters for each word, starting in {}.
 A word is a sequence of characters delimited by spaces/tabs.
 """.format("uppercase" if cap_type == Capital.ALTERNATE_FIRST else "lowercase")
 

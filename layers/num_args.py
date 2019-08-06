@@ -24,19 +24,19 @@ def init(variables):
         qvars["num_args.type"] = Compare.NOT_EQUAL
 
 
-def execute():
-    args = qvars.get("args")
+def execute(argv):
     n = qvars.get("num_args.n")
     condition = qvars.get("num_args.type")
 
-    ac = len(args)
+    ac = len(argv)
     if (condition == Compare.EQUAL and ac == n) \
             or (condition == Compare.NOT_EQUAL and ac != n) \
             or (condition == Compare.GREATER and ac > n) \
             or (condition == Compare.GREATER_EQUAL and ac >= n) \
             or (condition == Compare.LESSER and ac < n) \
             or (condition == Compare.LESSER_EQUAL and ac <= n):
-        qvars["args"] = [""]
+        return [""]
+    return argv
 
 
 def get_subject():

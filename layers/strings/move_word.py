@@ -11,12 +11,12 @@ def init(variables):
     qvars["move_word.dest"] = "front" if random.randint(0, 1) == 0 else "end"
 
 
-def execute():
-    args = qvars.get("args")
+def execute(argv):
     idx = qvars.get("move_word.idx")
     dest = qvars.get("move_word.dest")
 
-    for i, arg in enumerate(args):
+    output = []
+    for arg in argv:
         words = arg.replace('\t', ' ').split(' ')
         trimmed = []
         for w in words:
@@ -24,7 +24,7 @@ def execute():
                 trimmed.append(w.strip())
 
         if len(trimmed) == 0:
-            args[i] = ""
+            output.append("")
             continue
 
         idx = (idx - 1) % len(trimmed)
@@ -33,13 +33,14 @@ def execute():
         else:
             res = trimmed[0:idx] + trimmed[idx + 1:] + trimmed[idx:idx + 1]
 
-        args[i] = ' '.join(res)
+        output.append(' '.join(res))
+    return output
 
 
 def get_subject():
     return """
-Outputs given strings with word #%move_word.idx% moved to the %move_word.dest% of the string, with each word separated by exactly one space.
-If the string contains fewer words than %move_word.idx%, the program continues counting from the front of the string.
+Outputs given strings with word number %move_word.idx% moved to the %move_word.dest% of the string, with each word separated by exactly one space.
+If the string contains fewer words than %move_word.idx%, the program continues counting from the beginning of the string.
 A word is a sequence of characters delimited by spaces/tabs.
 """
 
