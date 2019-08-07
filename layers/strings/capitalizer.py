@@ -1,14 +1,14 @@
-from enum import Enum
+from enum import Flag, auto
 import random
 
 
-class Capital(Enum):
-    UPPER_FIRST = 0
-    UPPER_LAST = 1
-    UPPER_ALL = 2
-    LOWER_ALL = 3
-    ALTERNATE_FIRST = 4
-    ALTERNATE_LAST = 5
+class Capital(Flag):
+    UPPER_FIRST = auto()
+    UPPER_LAST = auto()
+    UPPER_ALL = auto()
+    LOWER_ALL = auto()
+    ALTERNATE_FIRST = auto()
+    ALTERNATE_LAST = auto()
 
 
 qvars = None
@@ -18,7 +18,7 @@ def init(variables):
     global qvars
     qvars = variables
     random.seed(qvars.get("seed"))
-    qvars["capitalizer.type"] = Capital(random.randint(0, 5))
+    qvars["capitalizer.type"] = Capital(1 << random.randint(0, 5))
 
 
 def execute(argv):
@@ -49,23 +49,38 @@ def execute(argv):
     return output
 
 
+def get_substitutions():
+    cap_type = qvars.get("capitalizer.type")
+
+    if cap_type & (Capital.UPPER_FIRST | Capital.UPPER_LAST):
+        case = "first" if cap_type == Capital.UPPER_FIRST else "last"
+    elif cap_type & (Capital.UPPER_ALL | Capital.ALTERNATE_FIRST):
+        case = "uppercase"
+    else:
+        case = "lowercase"
+
+    return [
+        ("case", case),
+    ]
+
+
 def get_subject():
     cap_type = qvars.get("capitalizer.type")
 
-    if cap_type == Capital.UPPER_FIRST or cap_type == Capital.UPPER_LAST:
+    if cap_type & (Capital.UPPER_FIRST | Capital.UPPER_LAST):
         return """
-Outputs given strings with the {} character of each word in uppercase, and the rest in lowercase.
+Outputs given strings with the %case% character of each word in uppercase, and the rest in lowercase.
 A word is a sequence of characters delimited by spaces/tabs.
-""".format("first" if cap_type == Capital.UPPER_FIRST else "last")
-    elif cap_type == Capital.UPPER_ALL or cap_type == Capital.LOWER_ALL:
+"""
+    elif cap_type & (Capital.UPPER_ALL | Capital.LOWER_ALL):
         return """
-Outputs given strings in all {} characters.
-""".format("uppercase" if cap_type == Capital.UPPER_ALL else "lowercase")
+Outputs given strings in all %case% characters.
+"""
     else:
         return """
-Output given strings with alternating uppercase and lowercase characters for each word, starting in {}.
+Output given strings with alternating uppercase and lowercase characters for each word, starting in %case%.
 A word is a sequence of characters delimited by spaces/tabs.
-""".format("uppercase" if cap_type == Capital.ALTERNATE_FIRST else "lowercase")
+"""
 
 
 def get_examples():

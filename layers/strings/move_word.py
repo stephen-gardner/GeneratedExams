@@ -1,5 +1,7 @@
 import random
 
+import util
+
 qvars = None
 
 
@@ -8,12 +10,12 @@ def init(variables):
     qvars = variables
     random.seed(qvars.get("seed"))
     qvars["move_word.idx"] = random.randint(2, 42)
-    qvars["move_word.dest"] = "front" if random.randint(0, 1) == 0 else "end"
+    qvars["move_word.dst"] = random.randint(0, 1)
 
 
 def execute(argv):
     idx = qvars.get("move_word.idx")
-    dest = qvars.get("move_word.dest")
+    dest = qvars.get("move_word.dst")
 
     output = []
     for arg in argv:
@@ -28,7 +30,7 @@ def execute(argv):
             continue
 
         idx = (idx - 1) % len(trimmed)
-        if dest == "front":
+        if dest == 0:
             res = trimmed[idx:idx + 1] + trimmed[0:idx] + trimmed[idx + 1:]
         else:
             res = trimmed[0:idx] + trimmed[idx + 1:] + trimmed[idx:idx + 1]
@@ -37,10 +39,21 @@ def execute(argv):
     return output
 
 
+def get_substitutions():
+    idx = qvars.get("move_word.idx")
+    dst = qvars.get("move_word.dst")
+
+    return [
+        ("nth", util.ordinal(idx)),
+        ("dst", "front" if dst == 0 else "end"),
+        ("num_words", "%d %s" % (idx, "words" if idx > 1 else "word")),
+    ]
+
+
 def get_subject():
     return """
-Outputs given strings with word number %move_word.idx% moved to the %move_word.dest% of the string, with each word separated by exactly one space.
-If the string contains fewer words than %move_word.idx%, the program continues counting from the beginning of the string.
+Outputs given strings with the %nth% word moved to the %dst% of the string, with each word separated by exactly one space.
+If the string contains fewer than %num_words%, the program continues counting from the beginning of the string.
 A word is a sequence of characters delimited by spaces/tabs.
 """
 

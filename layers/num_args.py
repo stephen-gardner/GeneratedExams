@@ -3,12 +3,12 @@ import random
 
 
 class Compare(Enum):
-    EQUAL = 1
-    NOT_EQUAL = 2
-    GREATER = 3
-    GREATER_EQUAL = 4
-    LESSER = 5
-    LESSER_EQUAL = 6
+    EQUAL = "is equal to"
+    NOT_EQUAL = "is not equal to"
+    GREATER = "is greater than"
+    GREATER_EQUAL = "is greater or equal to"
+    LESSER = "is lesser than"
+    LESSER_EQUAL = "is lesser or equal to"
 
 
 qvars = None
@@ -39,27 +39,20 @@ def execute(argv):
     return argv
 
 
-def get_subject():
+def get_substitutions():
     n = qvars.get("num_args.n")
-    condition = qvars.get("num_args.type")
+    compare_type = qvars.get("num_args.type")
 
-    type_str = ""
-    if condition == Compare.EQUAL:
-        type_str = "is "
-    elif condition == Compare.NOT_EQUAL:
-        type_str = "is not"
-    elif condition == Compare.GREATER:
-        type_str = "is greater than"
-    elif condition == Compare.GREATER_EQUAL:
-        type_str = "is greater or equal to"
-    elif condition == Compare.LESSER:
-        type_str = "is lesser than"
-    elif condition == Compare.LESSER_EQUAL:
-        type_str = "is lesser or equal to"
+    return [
+        ("compare_type", compare_type.value),
+        ("n", str(n)),
+    ]
 
+
+def get_subject():
     return """
-If the number of args {} {}, return '\\n'
-""".format(type_str, n)
+If the number of args %compare_type% %n%, return '\\n'
+"""
 
 
 def get_examples():

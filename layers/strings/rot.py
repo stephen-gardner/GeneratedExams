@@ -31,13 +31,21 @@ def execute(argv):
     return output
 
 
-def get_subject():
+def get_substitutions():
     n = qvars.get("rot.n")
 
+    return [
+        ("n", str(n)),
+        ("z", shift_chars("z", n)),
+        ("Z", shift_chars("Z", n)),
+    ]
+
+
+def get_subject():
     return """
-Outputs given strings with each of its letters replaced by the letter %rot.n% spaces ahead in alphabetical order.
-'{}' becomes '{}' and '{}' becomes '{}'.
-""".format("z", shift_chars("z", n), "Z", shift_chars("Z", n))
+Outputs given strings with each of its letters replaced by the letter %n% spaces ahead in alphabetical order.
+'z' becomes '%z%' and 'Z' becomes '%Z%'.
+"""
 
 
 def get_examples():
