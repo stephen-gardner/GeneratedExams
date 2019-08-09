@@ -1,30 +1,53 @@
 import importlib
 import pkgutil
 import random
+
 import layers.num_args as num_args
 
 
 class Question:
-    def __init__(self, seed, prog_name, category, base_layers=None):
-        layers = []
+    def __init__(self, seed, category, base_layers=None):
         path = "layers." + category
-        for layer_name in base_layers or []:
-            layers.append(importlib.import_module(path + "." + layer_name))
 
         self.qvars = {
-            "layers": layers,
+            "layers": [],
             "path": path,
-            "prog_name": prog_name,
+            "prog_name": category,
             "seed": seed,
         }
 
+        main_layer = '.'.join([category, category])
+        if base_layers is None or main_layer not in base_layers:
+            base_layers = [main_layer] + base_layers if base_layers is not None else [main_layer]
+        for layer_path in base_layers or []:
+            self.load_layer("layers." + layer_path)
+
         self.available_layers = []
-        sub_pkg = importlib.import_module(path)
-        for _, layer_name, _ in pkgutil.iter_modules(sub_pkg.__path__):
-            if base_layers is None or layer_name not in base_layers:
-                self.available_layers.append(importlib.import_module(path + "." + layer_name))
+        pkg = importlib.import_module(path)
+        for _, layer_name, _ in pkgutil.iter_modules(pkg.__path__):
+            layer_path = '.'.join([category, layer_name])
+            if base_layers is None or layer_path not in base_layers:
+                self.available_layers.append("layers." + layer_path)
 
         random.seed(seed)
+
+    def load_layer(self, path):
+        split_path = path.split('.')
+        if len(split_path) > 2:
+            importlib.import_module('.'.join(split_path[0:2]))
+        layer = importlib.import_module(path)
+        layer.init(self.qvars)
+        self.qvars.get("layers").append(layer)
+        return layer
+
+    def load_random_layers(self):
+        """Loads a random number of applicable layers, and then initializes all active layers"""
+        if len(self.available_layers) > 0:
+            nlayers = random.randint(0, len(self.available_layers))
+            for layer in random.sample(self.available_layers, nlayers):
+                self.load_layer(layer)
+
+        return self
 
     def limit_args(self, n=None, compare_type=None):
         """Enables num_args layer; by default, it sets the constraints to to print '\n' if the number of arguments is
@@ -37,16 +60,6 @@ class Question:
 
         num_args.init(self.qvars)
         self.qvars.get("layers").append(num_args)
-        return self
-
-    def load_layers(self):
-        """Loads a random number of applicable layers, and then initializes all active layers"""
-        if len(self.available_layers) > 1:
-            nlayers = random.randint(1, len(self.available_layers))
-            for layer in random.sample(self.available_layers, nlayers):
-                layer.init(self.qvars)
-                self.qvars.get("layers").append(layer)
-
         return self
 
     def execute(self, args):
@@ -108,3 +121,12 @@ The following operations must be performed in the order specified:
                 subject.remove(line)
         self.qvars["subject"] = '\n'.join(subject)
         return self
+
+
+def gen_question(seed):
+    random.seed(seed)
+    question = Question(seed, "move_word").load_random_layers()
+    if random.getrandbits(1):
+        question.limit_args()
+    question.build_subject().build_examples()
+    return question

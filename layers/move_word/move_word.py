@@ -1,7 +1,7 @@
+import inflect
 import random
 
-import util
-
+p = inflect.engine()
 qvars = None
 
 
@@ -40,20 +40,24 @@ def execute(argv):
 
 
 def get_substitutions():
+    num_args = qvars.get("num_args.n")
     idx = qvars.get("move_word.idx")
     dst = qvars.get("move_word.dst")
 
     return [
-        ("nth", util.ordinal(idx)),
+        ("string", p.plural_noun("string", num_args)),
+        ("the", "the" if num_args == 1 else "their"),
+        ("nth", p.ordinal(idx)),
         ("dst", "front" if dst == 0 else "end"),
-        ("num_words", "%d %s" % (idx, "words" if idx > 1 else "word")),
+        ("particle", "the" if num_args == 1 else "a"),
+        ("num_words", str(idx)),
     ]
 
 
 def get_subject():
     return """
-Outputs given strings with the %nth% word moved to the %dst% of the string, with each word separated by exactly one space.
-If the string contains fewer than %num_words%, the program continues counting from the beginning of the string.
+Outputs given %string% with %the% %nth% word moved to the %dst% of the string, with each word separated by exactly one space.
+If %particle% string has fewer than %num_words% words, the program continues counting from the beginning of the string.
 A word is a sequence of characters delimited by spaces/tabs.
 """
 
@@ -63,5 +67,5 @@ def get_examples():
         "abc   ",
         "Que la  \tlumiere soit et la lumiere fut",
         "\t AkjhZ zLKIJz , 23y",
-        ["first", "2", "11000000"],
+        ["first is the worst", "2nd is the best", "third is the one with the hairy chest"],
     ]
