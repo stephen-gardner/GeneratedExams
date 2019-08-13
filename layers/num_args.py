@@ -56,4 +56,4 @@ If the number of args %compare_type% %n%, return '\\n'.
 
 
 def get_examples():
-    return []
+    return None

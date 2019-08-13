@@ -1,5 +1,6 @@
 from datetime import datetime
-import question as q
+
+from question import gen_question
 
 
 # res = set([])
@@ -23,9 +24,9 @@ import question as q
 
 
 def print_new_question():
-    question = q.gen_question(datetime.utcnow().timestamp())
-    output = question.qvars.get("subject") + "\n\n" + question.qvars.get("examples")
-    print("\n\t\t\t\t>> %s (%d) <<\n" % (question.qvars.get("prog_name"), question.qvars.get("seed")))
+    q = gen_question(datetime.utcnow().timestamp())
+    output = q.qvars.get("subject") + "\n\n" + q.qvars.get("examples")
+    print("\n\t\t\t\t>> %s (%d) <<\n" % (q.qvars.get("prog_name"), q.qvars.get("seed")))
     print(output)
 
 

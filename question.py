@@ -7,6 +7,7 @@ import layers.num_args as num_args
 
 class Question:
     def __init__(self, seed, category, base_layers=None):
+        random.seed(seed)
         path = "layers." + category
 
         self.qvars = {
@@ -28,8 +29,6 @@ class Question:
             layer_path = '.'.join([category, layer_name])
             if base_layers is None or layer_path not in base_layers:
                 self.available_layers.append("layers." + layer_path)
-
-        random.seed(seed)
 
     def load_layer(self, path):
         split_path = path.split('.')
@@ -87,7 +86,7 @@ class Question:
         """Aggregates example sets of active layers, and builds an I/O example set"""
         examples = {""}
         for layer in self.qvars.get("layers"):
-            for ex in layer.get_examples():
+            for ex in layer.get_examples() or []:
                 examples.add(tuple(ex) if type(ex) is list else ex)
 
         res = []
@@ -125,7 +124,14 @@ The following operations must be performed in the order specified:
 
 def gen_question(seed):
     random.seed(seed)
-    question = Question(seed, "move_word").load_random_layers()
+
+    categories = []
+    pkg = importlib.import_module("layers")
+    for _, category, subpkg in pkgutil.iter_modules(pkg.__path__):
+        if subpkg:
+            categories.append(category)
+
+    question = Question(seed, random.sample(categories, 1)[0]).load_random_layers()
     if random.getrandbits(1):
         question.limit_args()
     question.build_subject().build_examples()
