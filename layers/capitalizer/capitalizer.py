@@ -68,6 +68,25 @@ def get_substitutions():
     ]
 
 
+def get_old_subject():
+    cap_type = qvars.get("capitalizer.type")
+
+    if cap_type == CapitalType.UPPER_FIRST or cap_type == CapitalType.UPPER_LAST:
+        return """
+Outputs given strings with the {} character of each word in uppercase, and the rest in lowercase.
+A word is a sequence of characters delimited by spaces/tabs.
+""".format("first" if cap_type == CapitalType.UPPER_FIRST else "last")
+    elif cap_type == CapitalType.UPPER_ALL or cap_type == CapitalType.LOWER_ALL:
+        return """
+Outputs given strings in all {} characters.
+""".format("uppercase" if cap_type == CapitalType.UPPER_ALL else "lowercase")
+    else:
+        return """
+Output given strings with alternating uppercase and lowercase characters for each word, starting in {}.
+A word is a sequence of characters delimited by spaces/tabs.
+""".format("uppercase" if cap_type == CapitalType.ALTERNATE_FIRST else "lowercase")
+
+
 def get_subject():
     cap_type = qvars.get("capitalizer.type")
 

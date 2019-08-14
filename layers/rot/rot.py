@@ -64,6 +64,29 @@ def get_substitutions():
     ]
 
 
+def get_old_subject():
+    rot_type = qvars.get("rot.type")
+
+    if rot_type & RotType.ALPHA_ONLY:
+        return """
+Outputs given strings with each of its letters replaced by the letter %alpha_n% spaces ahead in alphabetical order.
+'z' becomes '%z%' and 'Z' becomes '%Z%'.
+"""
+    elif rot_type & RotType.NUMBERS_ONLY:
+        return """
+Outputs given strings with each of its numerical digits replaced by the digit %num_n% characters ahead.
+'9' becomes '%9%' and '42' becomes '%42%'.
+"""
+    else:
+        return """
+Outputs given strings with each of its letters replaced by the letter %alpha_n% spaces ahead in alphabetical order.
+'z' becomes '%z%' and 'Z' becomes '%Z%'.
+        
+Outputs given strings with each of its numerical digits replaced by the digit %num_n% characters ahead.
+'9' becomes '%9%' and '42' becomes '%42%'.
+        """
+
+
 def get_subject():
     rot_type = qvars.get("rot.type")
 

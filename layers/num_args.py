@@ -49,6 +49,12 @@ def get_substitutions():
     ]
 
 
+def get_old_subject():
+    return """
+If the number of args %compare_type% %n%, return '\\n'.
+"""
+
+
 def get_subject():
     return """
 If the number of args %compare_type% %n%, return '\\n'.

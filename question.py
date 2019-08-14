@@ -99,6 +99,27 @@ class Question:
         self.qvars["examples"] = "Examples:\n\n" + '\n'.join(res)
         return self
 
+    def build_old_subject(self):
+        old_subject = """
+The following operations must be performed in the order specified:
+"""
+
+        for layer in self.qvars.get("layers"):
+            layer_sub = layer.get_old_subject()
+            for sub in layer.get_substitutions():
+                layer_sub = layer_sub.replace("%" + sub[0] + "%", sub[1])
+            old_subject += layer_sub
+
+        old_subject = old_subject.replace("\\%", "%").lstrip('\n').split('\n')
+        present = set([])
+        for line in old_subject:
+            if line == "" or line not in present:
+                present.add(line)
+            else:
+                old_subject.remove(line)
+        self.qvars["old_subject"] = '\n'.join(old_subject)
+        return self
+
     def build_subject(self):
         """Aggregates subjects of active layers and removes non-empty, duplicate lines"""
         subject = """
@@ -134,5 +155,5 @@ def gen_question(seed):
     question = Question(seed, random.sample(categories, 1)[0]).load_random_layers()
     if random.getrandbits(1):
         question.limit_args()
-    question.build_subject().build_examples()
+    question.build_subject().build_examples().build_old_subject()
     return question

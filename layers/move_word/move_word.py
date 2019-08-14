@@ -54,6 +54,14 @@ def get_substitutions():
     ]
 
 
+def get_old_subject():
+    return """
+Outputs given strings with word number %num_words% moved to the %dst% of the string, with each word separated by exactly one space.
+If the string contains fewer words than %num_words%, the program continues counting from the beginning of the string.
+A word is a sequence of characters delimited by spaces/tabs.
+"""
+
+
 def get_subject():
     return """
 Outputs given %string% with %the% %nth% word moved to the %dst% of the string, with each word separated by exactly one space.
