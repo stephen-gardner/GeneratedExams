@@ -32,13 +32,12 @@ def get_tests(login):
 
 @route("/<login>/grade", method="post")
 def grade_submission(login):
-    user_data = users.get(login)
-    if user_data is None:
+    if login not in users:
         return "No active exam session\n"
+    user_data = users.pop(login)
     submission = request.body.read().decode("UTF-8").splitlines()
     seed = user_data.get("question").qvars.get("seed")
     result = validate_output(seed, user_data.get("tests"), submission)
-    del users[login]
     return result
 
 
@@ -56,4 +55,4 @@ def get_answer(login):
     return '\n'.join(answers)
 
 
-run(host='localhost', port=4242)
+run(host='0.0.0.0', port=4242)
