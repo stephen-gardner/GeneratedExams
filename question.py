@@ -96,7 +96,7 @@ class Question:
             res.append(self.format_example(original, '\n'.join(self.execute(ex)), use_cat))
             use_cat = random.randint(1, 100) > 90
 
-        self.qvars["examples"] = "Examples:\n\n" + '\n'.join(res)
+        self.qvars["examples"] = "Examples:\n\n%s\n" % '\n'.join(res)
         return self
 
     def build_subject(self):

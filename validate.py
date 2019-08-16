@@ -52,27 +52,28 @@ def validate_output(seed, tests, output):
                 correct += 1
         total += 1
 
-    print("Grade: %.2f" % ((correct / total) * 100))
+    if correct < 0:
+        correct = 0
+    return "%.2f" % ((correct / total) * 100)
 
-
-def test_tests(seed):
-    tests = generate_tests(seed)
-    q = gen_question(seed)
-
-    print("Input:\n------\n", '\n'.join(tests))
-    # output_file = open("output.txt", "w")
-    # for test in tests:
-    #     output_file.write('\n'.join(q.execute(test)) + '\n')
-    # output_file.close()
-
-    print("\nOutput:\n-------")
-    output_file = open("output.txt", "r")
-    output = output_file.read().splitlines()
-    output_file.close()
-    print('\n'.join(output))
-    validate_output(seed, tests, output)
-
-
-from datetime import datetime
-
-test_tests(1337)
+# def test_tests(seed):
+#     tests = generate_tests(seed)
+#     q = gen_question(seed)
+#
+#     print("Input:\n------\n", '\n'.join(tests))
+#     # output_file = open("output.txt", "w")
+#     # for test in tests:
+#     #     output_file.write('\n'.join(q.execute(test)) + '\n')
+#     # output_file.close()
+#
+#     print("\nOutput:\n-------")
+#     output_file = open("output.txt", "r")
+#     output = output_file.read().splitlines()
+#     output_file.close()
+#     print('\n'.join(output))
+#     validate_output(seed, tests, output)
+#
+#
+# from datetime import datetime
+#
+# test_tests(1337)
